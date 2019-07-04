@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="date.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+</head>
+<body>
+    <div id="list">
+        <table>
+            <tr v-for="item in items" :id="'item_' + item.id">
+                <td>{{item.name}}</td>
+                <td>{{date("Y-m-d H:i", new Date(item.date) / 1000)}}</td>
+                <td><input type="button" value="Delete" @click="del(item.id)"></td>
+            </tr>
+        </table>
+        <input type="text" @keypress.enter="insert()" v-model="name">
+    </div>
+    <script>
+        var socket = io();
+        var list = new Vue({
+            el: "#list",
+            data: {
+                name: "",
+                items: []
+            },
+            methods: {
+                insert: () => {
+                    socket.emit("insert", {
+                        name: list.name
+                    });
+                    list.name = "";
+                },
+                del: (id) => {
+                    socket.emit("delete", id);
+                    document.getElementById('item_' + id).style.display = "none";
+                }
+            }
+        });
+        socket.on("data", (data) => {
+            list.items = data;
+        });
+        socket.on('updated', function(item){
+            if(item.new_val != null){
+                list.items.push(item.new_val);
+            }
+        });
+    </script>
+</body>
+</html>
