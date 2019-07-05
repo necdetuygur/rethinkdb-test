@@ -8,17 +8,18 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="date.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+    <style> body {font-family: monospace;} </style>
 </head>
 <body>
     <div id="list">
+        <input type="text" @keypress.enter="insert()" v-model="name">
         <table>
-            <tr v-for="item in items" :id="'item_' + item.id">
-                <td>{{item.name}}</td>
+            <tr v-for="item in items">
+                <td @click="update(item.id)">{{item.name}}</td>
                 <td>{{date("Y-m-d H:i", new Date(item.date) / 1000)}}</td>
                 <td><input type="button" value="Delete" @click="del(item.id)"></td>
             </tr>
         </table>
-        <input type="text" @keypress.enter="insert()" v-model="name">
     </div>
     <script>
         var socket = io();
@@ -35,9 +36,14 @@
                     });
                     list.name = "";
                 },
+                update: (id) => {
+                    name = prompt("Insert Text", "");
+                    if(name != null){
+                        socket.emit("update", id, name);
+                    }
+                },
                 del: (id) => {
                     socket.emit("delete", id);
-                    document.getElementById('item_' + id).style.display = "none";
                 }
             }
         });
