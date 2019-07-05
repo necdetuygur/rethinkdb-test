@@ -22,20 +22,28 @@ io.sockets.on('connection', function (socket) {
         r.connect(config).then(function (conn) {
             r.table('table').filter({ id: id }).delete().run(conn);
         });
-        get(socket);
+        get();
     });
-    get(socket);
+    socket.on("update", (id, name) => {
+        r.connect(config).then(function (conn) {
+            r.table('table').filter({ id: id }).update({ name: name }).run(conn);
+        });
+        get();
+    });
+    get();
     socket.on("get", () => {
-        get(socket);
+        get();
     });
 });
 
-var get = (socket) => {
-    r.connect(config).then(function (conn) {
-        r.table('table').orderBy("date").run(conn, function (err, result) {
-            socket.emit("data", result);
+var get = () => {
+    setTimeout(() => {
+        r.connect(config).then(function (conn) {
+            r.table('table').orderBy("date").run(conn, function (err, result) {
+                io.emit("data", result);
+            });
         });
-    });
+    }, 500);
 }
 
 app.use(express.static(__dirname + "/public"));
