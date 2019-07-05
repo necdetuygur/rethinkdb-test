@@ -38,7 +38,7 @@
                 },
                 update: (id) => {
                     name = prompt("Insert Text", "");
-                    if(name != null){
+                    if(name != "null"){
                         socket.emit("update", id, name);
                     }
                 },
